@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4">Добро пожаловать в мир барменского искусства!</h1>
+            <p class="lead">Профессиональные курсы, оборудование и литература для барменов всех уровней</p>
+            <a href="{% url 'catalog:product_list' %}" class="btn btn-primary btn-lg">Перейти к каталогу</a>
+        </div>
+        <div class="col-lg-6">
+            <img src="https://via.placeholder.com/600x400" alt="Bar" class="img-fluid rounded">
+        </div>
+    </div>
+
+    <!-- Краткое описание категорий (без товаров) -->
+    <div class="row mb-5">
+        <div class="col-md-4 text-center mb-4">
+            <i class="bi bi-cup-straw display-1 text-primary"></i>
+            <h3>Курсы</h3>
+            <p>Профессиональное обучение для барменов любого уровня</p>
+            <a href="{% url 'catalog:product_list' %}?type=course" class="btn btn-outline-primary">Смотреть курсы</a>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <i class="bi bi-tools display-1 text-primary"></i>
+            <h3>Оборудование</h3>
+            <p>Шейкеры, ложки, джиггеры и другой профессиональный инвентарь</p>
+            <a href="{% url 'catalog:product_list' %}?type=equipment" class="btn btn-outline-primary">Смотреть оборудование</a>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <i class="bi bi-book display-1 text-primary"></i>
+            <h3>Книги</h3>
+            <p>Литература для профессионального роста</p>
+            <a href="{% url 'catalog:product_list' %}?type=book" class="btn btn-outline-primary">Смотреть книги</a>
+        </div>
+    </div>
+
+    <!-- Преимущества -->
+    <div class="row bg-light py-5 rounded">
+        <div class="col-md-3 text-center">
+            <i class="bi bi-truck display-4 text-primary"></i>
+            <h5>Быстрая доставка</h5>
+        </div>
+        <div class="col-md-3 text-center">
+            <i class="bi bi-shield-check display-4 text-primary"></i>
+            <h5>Гарантия качества</h5>
+        </div>
+        <div class="col-md-3 text-center">
+            <i class="bi bi-people display-4 text-primary"></i>
+            <h5>Опытные консультанты</h5>
+        </div>
+        <div class="col-md-3 text-center">
+            <i class="bi bi-gem display-4 text-primary"></i>
+            <h5>Только оригинал</h5>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="quickOrderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Быстрый заказ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'catalog:quick_order' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="product_id" id="modal-product-id">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Ваше имя</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.quick-order-btn').click(function() {
+        var productId = $(this).data('product-id');
+        $('#modal-product-id').val(productId);
+        $('#quickOrderModal').modal('show');
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

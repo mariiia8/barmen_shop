@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Создание заказа - CRM{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Создание нового заказа</h1>
+    
+    <form method="post" id="orderForm">
+        {% csrf_token %}
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Выберите клиента</h5>
+                    </div>
+                    <div class="card-body">
+                        <select class="form-select" name="client_id" required>
+                            <option value="">-- Выберите клиента --</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}" {% if request.GET.client_id == client.id|stringformat:"i" %}selected{% endif %}>
+                                {{ client.name }} ({{ client.phone }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Добавьте товары</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="products-list">
+                            {% for product in products %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input product-checkbox" type="checkbox" name="products" value="{{ product.id }}" id="product{{ product.id }}">
+                                <label class="form-check-label" for="product{{ product.id }}">
+                                    {{ product.name }} - {{ product.price }} ₽
+                                </label>
+                                <input type="number" class="form-control form-control-sm d-inline-block w-auto ms-3" 
+                                       name="quantity_{{ product.id }}" value="1" min="1" 
+                                       style="width: 70px;" disabled>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="text-end">
+                            <h5>Итого: <span id="totalAmount">0</span> ₽</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check"></i> Создать заказ
+                </button>
+                <a href="{% url 'crm:dashboard' %}" class="btn btn-secondary">
+                    Отмена
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    const quantityInputs = document.querySelectorAll('input[type="number"]');
+    const totalSpan = document.getElementById('totalAmount');
+    
+    function updateTotal() {
+        let total = 0;
+        checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                const price = parseFloat(checkbox.nextElementSibling.textContent.split('-')[1].replace('₽', '').trim());
+                const quantity = parseInt(quantityInputs[index].value) || 1;
+                total += price * quantity;
+            }
+        });
+        totalSpan.textContent = total;
+    }
+    
+    checkboxes.forEach((checkbox, index) => {
+        checkbox.addEventListener('change', function() {
+            quantityInputs[index].disabled = !this.checked;
+            updateTotal();
+        });
+    });
+    
+    quantityInputs.forEach(input => {
+        input.addEventListener('input', updateTotal);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

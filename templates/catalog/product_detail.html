@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - BarMan Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'catalog:product_list' %}">Каталог</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ product.image.url|default:'https://via.placeholder.com/600x400' }}" class="img-fluid rounded" alt="{{ product.name }}">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ product.name }}</h1>
+            <p class="text-muted">Категория: {{ product.category.name }}</p>
+            
+            <div class="mb-3">
+                <span class="h2 text-primary">{{ product.price }} ₽</span>
+            </div>
+            
+            {% if product.stock > 0 %}
+                <p class="text-success"><i class="bi bi-check-circle"></i> В наличии</p>
+            {% else %}
+                <p class="text-danger"><i class="bi bi-x-circle"></i> Нет в наличии</p>
+            {% endif %}
+            
+            {% if product.duration %}
+                <p><strong>Длительность:</strong> {{ product.duration }}</p>
+            {% endif %}
+            
+            {% if product.level %}
+                <p><strong>Уровень:</strong> 
+                    {% if product.level == 'beginner' %}Начинающий
+                    {% elif product.level == 'intermediate' %}Средний
+                    {% elif product.level == 'advanced' %}Продвинутый
+                    {% endif %}
+                </p>
+            {% endif %}
+            
+            <div class="mb-4">
+                <h4>Описание</h4>
+                <p>{{ product.description|linebreaks }}</p>
+            </div>
+            
+            <button class="btn btn-primary btn-lg w-100 quick-order-btn" data-product-id="{{ product.id }}">
+                Быстрый заказ
+            </button>
+        </div>
+    </div>
+    
+    <!-- Похожие товары -->
+    {% if related_products %}
+    <div class="row mt-5">
+        <h3 class="mb-4">Похожие товары</h3>
+        {% for related in related_products %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <img src="{{ related.image.url|default:'https://via.placeholder.com/300x200' }}" class="card-img-top" alt="{{ related.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ related.name }}</h5>
+                    <p class="text-primary fw-bold">{{ related.price }} ₽</p>
+                   

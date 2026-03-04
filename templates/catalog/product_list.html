@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Каталог - BarMan Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Фильтры -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Категории</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'catalog:product_list' %}" class="list-group-item list-group-item-action {% if not current_type %}active{% endif %}">
+                        Все товары
+                    </a>
+                    <a href="?type=course" class="list-group-item list-group-item-action {% if current_type == 'course' %}active{% endif %}">
+                        Курсы
+                    </a>
+                    <a href="?type=equipment" class="list-group-item list-group-item-action {% if current_type == 'equipment' %}active{% endif %}">
+                        Оборудование
+                    </a>
+                    <a href="?type=book" class="list-group-item list-group-item-action {% if current_type == 'book' %}active{% endif %}">
+                        Книги
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Поиск -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Поиск</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" placeholder="Название..." value="{{ request.GET.search }}">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Список товаров -->
+        <div class="col-md-9">
+            <h2 class="mb-4">Каталог товаров</h2>
+            
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ product.image.url|default:'https://via.placeholder.com/300x200' }}" class="card-img-top" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text text-muted">{{ product.category.name }}</p>
+                            <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                            <p class="text-primary fw-bold">{{ product.price }} ₽</p>
+                            {% if product.stock > 0 %}
+                                <span class="badge bg-success mb-2">В наличии</span>
+                            {% else %}
+                                <span class="badge bg-danger mb-2">Нет в наличии</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{% url 'catalog:product_detail' product.slug %}" class="btn btn-outline-primary w-100 mb-2">
+                                Подробнее
+                            </a>
+                            <button class="btn btn-primary w-100 quick-order-btn" data-product-id="{{ product.id }}">
+                                Быстрый заказ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Товары не найдены
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно быстрого заказа -->
+<div class="modal fade" id="quickOrderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Быстрый заказ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'catalog:quick_order' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="product_id" id="modal-product-id">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Ваше имя</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.quick-order-btn').click(function() {
+        var productId = $(this).data('product-id');
+        $('#modal-product-id').val(productId);
+        $('#quickOrderModal').modal('show');
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
